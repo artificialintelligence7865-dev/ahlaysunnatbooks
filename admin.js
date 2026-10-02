@@ -9,15 +9,17 @@ import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject }
 
 /* ====== 1. CONFIG: paste your values from Firebase Console > Project settings ====== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  const firebaseConfig = {
+  apiKey: "AIzaSyCi1q0p8pnmDxtzYc5WeuJEN5GQSE8ECWQ",
+  authDomain: "ahlaysunnatbooks.firebaseapp.com",
+  projectId: "ahlaysunnatbooks",
+  storageBucket: "ahlaysunnatbooks.firebasestorage.app",
+  messagingSenderId: "157623542830",
+  appId: "1:157623542830:web:544cc54ace2438dd17ebbf",
+  measurementId: "G-1SXMRL94FW"
 };
 // UID(s) of the admin user(s) (Firebase Console > Authentication > Users). Must match the UID in your security rules.
-const ADMIN_UIDS = ["PASTE_ADMIN_UID_HERE"];
+["const ADMIN_UIDS = ["ljloRpX356Z1sVxeolQgFjKhvCD3"];"];
 export const CATEGORIES = ["Hadith", "Fiqh", "Seerat", "Aqeedah"];
 
 const app = initializeApp(firebaseConfig);
