@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ahle Sunnat eBooks</title>
+
+  <!-- Fonts: Amiri (headings, Arabic), Source Sans 3 (body), Noto Nastaliq Urdu (Urdu text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind (CDN) with class-based dark mode -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {
+        colors: { brand: { DEFAULT: '#0F5B3F', dark: '#0A3D2A' }, gold: '#B8893B', paper: '#F3F5F2', night: '#0C1511' },
+        fontFamily: { display: ['Amiri', 'serif'], sans: ['"Source Sans 3"', 'sans-serif'] }
+      } }
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Urdu/Arabic text renders in the right typeface when dir="rtl" */
+    [dir="rtl"] { font-family: 'Noto Nastaliq Urdu', 'Amiri', serif; line-height: 2; }
+    :focus-visible { outline: 2px solid #B8893B; outline-offset: 2px; }
+  </style>
+</head>
+
+<body class="bg-paper text-stone-800 dark:bg-night dark:text-stone-100 font-sans">
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-30 bg-white/90 dark:bg-night/90 backdrop-blur border-b border-stone-200 dark:border-stone-800">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+      <a href="#" id="logo" class="flex items-center gap-2 font-display text-xl font-bold text-brand dark:text-emerald-400 shrink-0">
+        <i data-lucide="book-open-text"></i><span class="hidden sm:inline">Ahle Sunnat eBooks</span>
+      </a>
+      <div class="relative flex-1 max-w-md ml-auto">
+        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-stone-400"></i>
+        <input class="search-input w-full pl-9 pr-3 py-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-transparent" placeholder="Search title or author" dir="auto" aria-label="Search books" />
+      </div>
+      <button id="themeToggle" class="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800" aria-label="Toggle dark mode"><i data-lucide="moon"></i></button>
+      <button id="adminBtn" class="px-3 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark flex items-center gap-2"><i data-lucide="lock" class="w-4 h-4"></i><span id="adminBtnText">Admin login</span></button>
+    </div>
+    <!-- Category filters -->
+    <nav id="categoryBar" class="max-w-6xl mx-auto px-4 pb-3 flex gap-2 overflow-x-auto"></nav>
+  </header>
+
+  <!-- ============ PUBLIC VIEW ============ -->
+  <main id="publicView">
+    <section class="bg-brand-dark text-white">
+      <div class="max-w-6xl mx-auto px-4 py-16 text-center">
+        <h1 class="font-display text-4xl sm:text-5xl font-bold">Read authentic Islamic books, free in your browser</h1>
+        <p class="mt-4 text-emerald-100 max-w-2xl mx-auto">Sahih Bukhari, Sahih Muslim, Sunan Abi Dawood and more. Search the library and start reading, no download needed.</p>
+        <div class="mt-8 max-w-xl mx-auto flex bg-white rounded-lg overflow-hidden">
+          <input class="search-input flex-1 px-4 py-3 text-stone-800 outline-none" placeholder="Search by book or author" dir="auto" aria-label="Search books" />
+          <a href="#library" class="px-5 py-3 bg-gold text-white font-semibold flex items-center">Search</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="library" class="max-w-6xl mx-auto px-4 py-10">
+      <h2 id="gridTitle" class="font-display text-2xl font-bold mb-6">All books</h2>
+      <div id="bookGrid" class="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+      <p id="emptyState" class="hidden text-center text-stone-500 py-16">No books match your search. Try another title, author or category.</p>
+    </section>
+  </main>
+
+  <!-- ============ ADMIN VIEW (hidden unless authenticated admin) ============ -->
+  <main id="adminView" class="hidden max-w-6xl mx-auto px-4 py-10 space-y-10">
+    <h2 class="font-display text-3xl font-bold">Admin dashboard</h2>
+
+    <!-- Overview metrics -->
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div class="p-5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800"><p class="text-sm text-stone-500">Total books</p><p id="statBooks" class="text-3xl font-bold">0</p></div>
+      <div class="p-5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800"><p class="text-sm text-stone-500">Total reads</p><p id="statReads" class="text-3xl font-bold">0</p></div>
+      <div class="p-5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800"><p class="text-sm text-stone-500">Categories in use</p><p id="statCats" class="text-3xl font-bold">0</p></div>
+    </div>
+
+    <!-- Add / edit form -->
+    <form id="bookForm" class="p-6 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 grid md:grid-cols-2 gap-4">
+      <h3 id="formTitle" class="md:col-span-2 font-display text-xl font-bold">Add new book</h3>
+      <label class="block">Title<input id="fTitle" required dir="auto" class="mt-1 w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent" /></label>
+      <label class="block">Author<input id="fAuthor" required dir="auto" class="mt-1 w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent" /></label>
+      <label class="block">Category
+        <select id="fCategory" required class="mt-1 w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900"></select>
+      </label>
+      <label class="block">Cover image URL (or upload below)<input id="fCoverUrl" type="url" class="mt-1 w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent" /></label>
+      <label class="block">Cover image upload<input id="fCoverFile" type="file" accept="image/*" class="mt-1 w-full" /></label>
+      <label class="block">PDF file<input id="fPdf" type="file" accept="application/pdf" class="mt-1 w-full" /></label>
+      <label class="block md:col-span-2">Description<textarea id="fDesc" rows="3" dir="auto" class="mt-1 w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent"></textarea></label>
+      <div class="md:col-span-2">
+        <div id="progressWrap" class="hidden h-2 bg-stone-200 dark:bg-stone-800 rounded mb-3"><div id="progressBar" class="h-2 bg-gold rounded w-0"></div></div>
+        <p id="formMsg" class="text-sm mb-2" role="status"></p>
+        <button id="saveBtn" class="px-5 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark">Publish book</button>
+        <button type="button" id="cancelEdit" class="hidden ml-2 px-5 py-2 rounded-lg border border-stone-300 dark:border-stone-700">Cancel edit</button>
+      </div>
+    </form>
+
+    <!-- Content management table -->
+    <div class="overflow-x-auto rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900">
+      <table class="w-full text-left">
+        <thead class="bg-stone-100 dark:bg-stone-800 text-sm"><tr><th class="p-3">Title</th><th class="p-3">Author</th><th class="p-3">Category</th><th class="p-3">Reads</th><th class="p-3">Actions</th></tr></thead>
+        <tbody id="bookTable"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- ============ READER MODAL ============ -->
+  <div id="readerModal" class="hidden fixed inset-0 z-40 bg-black/80 flex flex-col" role="dialog" aria-modal="true" aria-label="Book reader">
+    <div class="flex items-center gap-3 p-3 bg-white dark:bg-night">
+      <h3 id="readerTitle" class="font-display text-lg font-bold flex-1 truncate" dir="auto"></h3>
+      <a id="readerOpen" target="_blank" rel="noopener" class="text-sm underline">Open in new tab</a>
+      <button id="readerClose" class="p-2 rounded hover:bg-stone-100 dark:hover:bg-stone-800" aria-label="Close reader"><i data-lucide="x"></i></button>
+    </div>
+    <iframe id="readerFrame" class="flex-1 w-full bg-white" title="PDF reader"></iframe>
+  </div>
+
+  <!-- ============ LOGIN MODAL ============ -->
+  <div id="loginModal" class="hidden fixed inset-0 z-40 bg-black/60 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Admin login">
+    <form id="loginForm" class="w-full max-w-sm p-6 rounded-lg bg-white dark:bg-stone-900 space-y-4">
+      <h3 class="font-display text-xl font-bold">Admin login</h3>
+      <input id="loginEmail" type="email" required placeholder="Email" autocomplete="username" class="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent" />
+      <input id="loginPass" type="password" required placeholder="Password" autocomplete="current-password" class="w-full p-2 rounded border border-stone-300 dark:border-stone-700 bg-transparent" />
+      <p id="loginMsg" class="text-sm text-red-600" role="alert"></p>
+      <div class="flex gap-2">
+        <button class="flex-1 py-2 rounded-lg bg-brand text-white hover:bg-brand-dark">Sign in</button>
+        <button type="button" id="loginCancel" class="px-4 py-2 rounded-lg border border-stone-300 dark:border-stone-700">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="text-center text-sm text-stone-500 py-8">Ahle Sunnat eBooks. Read, learn and share authentic knowledge.</footer>
+
+  <!-- app.js imports admin.js (Firebase + admin logic), so one module tag is enough -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
